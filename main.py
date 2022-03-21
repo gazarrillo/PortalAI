@@ -14,36 +14,55 @@ outputs = []
 test_inputs= []
 test_outputs = []
 
-#get inputs and outputs from all xml files
-for i in range(TOTAL_TRAINING_FILES+1):
+def getXMLValues(fileName):
+    # get individual values from xml
+    revenue = fileName.getElementsByTagName(TOTAL_REVENUE)
+    expenses = fileName.getElementsByTagName(TOTAL_EXPENSES)
+    salaries = fileName.getElementsByTagName(SALARIES)
 
-    file = minidom.parse(getFileName(i))
+    return revenue,expenses, salaries
 
-    #get individual values from xml
-    revenue = file.getElementsByTagName(TOTAL_REVENUE)
-    expenses = file.getElementsByTagName(TOTAL_EXPENSES)
-    salaries = file.getElementsByTagName(SALARIES)
-
-    #add data to input array
+def addXMLValues(rev,exp,sal):
     indvArr = []
-    indvArr.append(float(revenue[0].firstChild.data))
-    indvArr.append(float(expenses[0].firstChild.data))
-    indvArr.append(float(salaries[0].firstChild.data))
+    addXMLValue(indvArr,rev)
+    addXMLValue(indvArr,exp)
+    addXMLValue(indvArr,sal)
+    return indvArr
 
-    #calculate and add data to output array
-    output = float(expenses[0].firstChild.data)/float(revenue[0].firstChild.data)
+def addXMLValue(arr, val):
+    arr.append(float(val[0].firstChild.data))
 
-    if (i == 20):
-        test_inputs.append(indvArr)
-        test_outputs.append(output)
-    else:
-        inputs.append(indvArr)
-        outputs.append(output)
+def addOutput(exp,rev):
+    return float(exp[0].firstChild.data)/float(rev[0].firstChild.data)
+
+#get inputs and outputs from all xml files
+def trainModel():
+    for i in range(TOTAL_TRAINING_FILES):
+
+        file = minidom.parse(getFileName(i))
+
+        revenue, expenses, salaries = getXMLValues(file)
+
+        #add data to input array
+        inputs.append(addXMLValues(revenue,expenses,salaries))
+
+        #calculate and add data to output array
+        outputs.append(addOutput(expenses, revenue))
+
+def testXML(fileName):
+    file = minidom.parse(fileName)
+    revenue, expenses, salaries = getXMLValues(file)
+    test_inputs.append(addXMLValues(revenue,expenses,salaries))
+    test_outputs.append(addOutput(expenses, revenue))
+
+trainModel()
+testXML('PortalXML/TestXML21.xml')
 
 x, y = np.array(inputs), np.array(outputs)
 x_new = np.array(test_inputs)
 model = LinearRegression().fit(x, y)
 r_sq = model.score(x, y)
+
 y_pred = model.intercept_ + np.sum(model.coef_ * x, axis=1)
 y_new = model.predict(x_new)
 
