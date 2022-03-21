@@ -55,6 +55,10 @@ def testXML(fileName):
     test_inputs.append(addXMLValues(revenue,expenses,salaries))
     test_outputs.append(addOutput(expenses, revenue))
 
+def emptyTestArrs():
+    test_inputs.clear()
+    test_outputs.clear()
+
 trainModel()
 testXML('PortalXML/TestXML21.xml')
 
@@ -79,3 +83,5 @@ print("[PREDICTED OUTPUT]:")
 print(y_new)
 print("[ACTUAL OUTPUT]:")
 print(test_outputs)
+
+emptyTestArrs()
